@@ -17,7 +17,7 @@
     }
   };
   </script> 
-  <script type="text/javascript" src="assets/caja.js"></script>
+  <script type="text/javascript" src="assets/caja-prototype.js"></script>
   <script type="text/javascript" src="assets/permissive.js"></script>
   <script type="text/javascript" src="assets/caja-debugmode.js"></script>
   <script type="text/javascript" src="assets/log-to-console.js"></script>
@@ -29,7 +29,9 @@
   <script type="text/javascript" src="assets/domita.js"></script>
 </head>
 <body>
-  <script type="text/javascript">(function () {
+  <script type="text/javascript">
+
+  (function () {
     ___.sharedImports.console = {};
     for (var k in { log: 0, warn: 0, info: 0, error: 0, trace: 0,
                     group: 0, groupEnd: 0, time: 0, timeEnd: 0, dir: 0,
@@ -41,7 +43,7 @@
   })();
   </script>
   
-  <div id="base-test" class="test"/></div>
+  <div id="base-test" class="test"></div>
 
   <script type="text/javascript">
     var testImports = ___.copy(___.sharedImports);
