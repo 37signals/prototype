@@ -1136,10 +1136,6 @@ var ___;
     if (canReadPub(obj, name)) { return obj[name]; }
     // "this" is bound to the local ___
     if (this.canCall(obj, name)) { return this.attach(obj, obj[name]); }
-
-    java.lang.System.out.println("POE +++ this = " + this);
-    java.lang.System.out.println("POE +++ this.getExtension = " + this.getExtension);
-    
     var ext = this.getExtension(obj, name);
     if (!ext) { fail("Internal: getExtension returned falsey"); }
     if (ext.length) { return ext[0]; }
@@ -2034,9 +2030,6 @@ var ___;
         simpleFunc(map.caja.extend);
         grantCall(map.caja, "extend");
         imports.caja = map.caja;
-
-        java.lang.System.out.println("++ POE new module; map.___.getExtension = " + map.___.getExtension);
-        
         newModule(map.___, imports);
       })
     });
