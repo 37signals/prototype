@@ -175,7 +175,7 @@ var ___;
    */
   function fail(var_args) {
     // TODO(metaweta): Ask mike samuel about this vs. log-to-console.js
-    (typeof console !== 'undefined') && console.trace();
+    (typeof console !== 'undefined') && (typeof console.trace === 'function') && console.trace();
     var message = Array.prototype.slice.call(arguments, 0).join('');
     myLogFunc_(message, true);
     throw new Error(message);
@@ -998,7 +998,7 @@ var ___;
    * May give false negatives, but won't give false positives.
    */
   function isPrototypical(o) {
-    if (typeof o !== 'object') {
+    if (typeof o !== 'object' || o === null) {
       return false;
     }
     var c = o.constructor;
@@ -1097,8 +1097,7 @@ var ___;
   function readProp(that, name) {
     name = String(name);
     if (canReadProp(that, name)) { return that[name]; }
-    // "this" is bound to the local ___
-    if (this.canCall(that, name)) { return this.attach(that, that[name]); }
+    if (canCall(that, name)) { return attach(that, that[name]); }
     return that.handleRead___(name, false);
   }
 
@@ -1134,11 +1133,13 @@ var ___;
     if ((typeof name) === 'number') { return obj[name]; }
     name = String(name);
     if (canReadPub(obj, name)) { return obj[name]; }
-    // "this" is bound to the local ___
-    if (this.canCall(obj, name)) { return this.attach(obj, obj[name]); }
-    var ext = this.getExtension(obj, name);
-    if (!ext) { fail("Internal: getExtension returned falsey"); }
-    if (ext.length) { return ext[0]; }
+    if (canCall(obj, name)) { return attach(obj, obj[name]); }
+    if (this && this.wonderbar___) {
+      // "this" is bound to the local ___
+      var ext = this.getExtension(obj, name);
+      if (!ext) { fail("Internal: getExtension returned falsey"); }
+      if (ext.length) { return ext[0]; }
+    }
     return obj.handleRead___(name, opt_shouldThrow);
   }
 
@@ -1151,7 +1152,7 @@ var ___;
    * more informative, rather than just whatever readPub throws.
    */
   function readImport(module_imports, name) {
-    return this.readPub(module_imports, name);
+    return readPub(module_imports, name);
   }
 
   /**
@@ -1313,14 +1314,16 @@ var ___;
    */
   function callPub(obj, name, args) {
     name = String(name);
-    if (this.canCallPub(obj, name)) {
+    if (canCallPub(obj, name)) {
       var meth = obj[name];
       return meth.apply(obj, args);
     }
-    // "this" is bound to the local ___
-    var ext = this.getExtension(obj, name);
-    if (!ext) { fail("Internal: getExtension returned falsey"); }
-    if (ext.length) { return ext[0].apply(obj, args); } 
+    if (this && this.wonderbar___) {
+      // "this" is bound to the local ___
+      var ext = this.getExtension(obj, name);
+      if (!ext) { fail("Internal: getExtension returned falsey"); }
+      if (ext.length) { return ext[0].apply(obj, args); }
+    }
     if (obj.handleCall___) { return obj.handleCall___(name, args); }
     fail('not callable %o %s', debugReference(obj), name);
   }
@@ -2024,13 +2027,21 @@ var ___;
       getImports: simpleFunc(function() { return imports; }),
       setImports: simpleFunc(function(newImports) { imports = newImports; }),
       handle: simpleFunc(function(newModule) {
-        var map = begetCajaObjects();
-        map.___.POE = {};
-        map.caja.extend = safeExtend(map.___.POE);
-        simpleFunc(map.caja.extend);
-        grantCall(map.caja, "extend");
-        imports.caja = map.caja;
-        newModule(map.___, imports);
+        var local___ = copy(___);
+        local___.wonderbar___ = true;
+        local___.POE = {};
+        var localCaja = copy(safeCaja);
+        localCaja.extendInstances = safeExtendInstances(local___.POE);
+        localCaja.extendStatic = safeExtendStatic(local___.POE);
+        localCaja.aliasInstances = function(obj, newName, origName) { obj.prototype.newName = obj.prototype.oldName; };
+        simpleFunc(localCaja.extendInstances);
+        simpleFunc(localCaja.extendStatic);
+        simpleFunc(localCaja.aliasInstances);
+        grantCall(localCaja, 'extendInstances');
+        grantCall(localCaja, 'extendStatic');
+        grantCall(localCaja, 'aliasInstances');
+        imports.caja = localCaja;
+        newModule(local___, imports);
       })
     });
   }
@@ -2139,7 +2150,7 @@ var ___;
     }
 
     // We'll want to add the tamed DOMado classes to this list.
-    var primordials = [Array, Boolean, Date, Number, String, Object];
+    var primordials = [Array, Boolean, Date, Number, String, Object, Function, RegExp];
     
     // Check whether the given class is in the list.
     var extensible = false;
@@ -2171,13 +2182,23 @@ var ___;
       }
     }));
   }
+
+  function safeExtendStatic(POE) {
+    return function(clazz, members) {
+      each(members, simpleFunc(function(m, value) {
+        clazz[m] = value;
+        grantRead(clazz, m);
+        grantCall(clazz, m);
+      }));
+    }
+  }
   
   /*
    * Creates a closure with the given primordial object extension table (POE).
    * The resulting closure allows to extend primordial objects with
    * the given map of members.
    */
-  function safeExtend(POE) {
+  function safeExtendInstances(POE) {
     return function(clazz, members) {
       validatePOE(POE, clazz, members);
       each(members, simpleFunc(function (m, value){
@@ -2185,7 +2206,7 @@ var ___;
         POE[m].push({clazz:clazz, value:value});
       }));
     };
-    }
+  }
   
   function unsafeExtend(clazz, members) {
     validatePOE({}, clazz, members);
@@ -2210,6 +2231,7 @@ var ___;
       case 'boolean': value = new Boolean(value); break;
       case 'number':  value = new Number(value); break;
       case 'string':  value = new String(value); break;
+      case 'function':  value = new Function(value); break;
     }
     for (var i = 0; i < classes.length; ++i) {
       var entry = classes[i];
@@ -2391,6 +2413,7 @@ var ___;
     Number: Number,
     Date: Date,
     RegExp: RegExp,
+    Function: Function,
 
     Error: Error,
     EvalError: EvalError,
@@ -2516,9 +2539,4 @@ var ___;
   caja.extend = unsafeExtend;
   primFreeze(caja);
   setNewModuleHandler(makeNormalNewModuleHandler());
-
-  function begetCajaObjects() {
-    function beget(obj) { function F(){} F.prototype=obj; return new F; }
-    return { caja: beget(caja), ___: copy(___) };
-  }
 })(this);

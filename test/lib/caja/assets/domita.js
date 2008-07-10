@@ -1053,9 +1053,9 @@ attachDocumentStub = (function () {
     imports.document = new TameDocument(document, true);
     imports.window = {};
     imports.navigator = {
-      userAgent: 'Caja 1.0'
+      userAgent: 'Caja/1.0'
     };
-    //___.allowRead(imports.navigator, 'userAgent');
+    ___.allowRead(imports.navigator, 'userAgent');
   }
 
   return attachDocumentStub;

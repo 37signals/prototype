@@ -36,7 +36,7 @@
     ___.setLogFunc(function(str, opt_stop) {
       global.console.log(str);
       if (opt_stop) {
-        ({})['\nError: ' + str](str);
+       // ({})['\nError: ' + str](str);
       }
     });
   }

@@ -63,7 +63,7 @@ JavaScriptTestTask.new(:test_units) do |t|
   Dir.mkdir(PROTOTYPE_TMP_DIR) unless File.exist?(PROTOTYPE_TMP_DIR)
   
   Dir["test/unit/*_test.js"].each do |file|
-    PageBuilder.new(file, 'prototype.erb').render
+    # PageBuilder.new(file, 'prototype.erb').render # TODO
     test_file = File.basename(file, ".js")
     test_name = test_file.sub("_test", "")
     unless tests_to_run && !tests_to_run.include?(test_name)
@@ -88,7 +88,7 @@ namespace 'caja' do
   
   desc 'Builds and cajoles gadgets.'
   task :cajole_gadgets => [:rm_tmp, :copy_assets, :copy_fixtures] do
-    Dir["test/unit/*_test.js"].each do |file|
+    Dir["test/unit/hash_test.js"].each do |file|  # TODO *_test.js
       puts "\nBuilding gadget for #{file}."
       puts "Cajoling gadget for #{file} (this might take a while)."
       FileUtils.cp(file, PROTOTYPE_TMP_DIR)
@@ -105,6 +105,8 @@ namespace 'caja' do
   desc 'Copies assets to test/unit/tmp/assets directory.'
   task :copy_assets => [:dist] do
     puts 'Copying assets to test/unit/tmp/assets directory.'
+    assets_dir = File.join(PROTOTYPE_TMP_DIR, 'assets')
+    FileUtils.rm_rf(assets_dir) if File.exist?(assets_dir)
     FileUtils.cp_r(File.join(PROTOTYPE_TEST_DIR, 'lib', 'assets'), PROTOTYPE_TMP_DIR)
     FileUtils.cp_r(File.join(PROTOTYPE_TEST_DIR, 'lib', 'caja', 'assets'), PROTOTYPE_TMP_DIR)
     FileUtils.cp(File.join(PROTOTYPE_DIST_DIR, 'prototype.js'), File.join(PROTOTYPE_TMP_DIR, 'assets'))
