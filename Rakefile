@@ -88,7 +88,7 @@ namespace 'caja' do
   
   desc 'Builds and cajoles gadgets.'
   task :cajole_gadgets => [:rm_tmp, :copy_assets, :copy_fixtures] do
-    Dir["test/unit/hash_test.js"].each do |file|  # TODO *_test.js
+    Dir["test/unit/truth_test.js"].each do |file|  # TODO *_test.js
       puts "\nBuilding gadget for #{file}."
       puts "Cajoling gadget for #{file} (this might take a while)."
       FileUtils.cp(file, PROTOTYPE_TMP_DIR)
@@ -108,7 +108,17 @@ namespace 'caja' do
     assets_dir = File.join(PROTOTYPE_TMP_DIR, 'assets')
     FileUtils.rm_rf(assets_dir) if File.exist?(assets_dir)
     FileUtils.cp_r(File.join(PROTOTYPE_TEST_DIR, 'lib', 'assets'), PROTOTYPE_TMP_DIR)
-    FileUtils.cp_r(File.join(PROTOTYPE_TEST_DIR, 'lib', 'caja', 'assets'), PROTOTYPE_TMP_DIR)
+    Dir["#{Caja.src_path}/src/com/google/caja/*.js"].each do |file|
+      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
+    end
+    Dir["#{Caja.src_path}/src/com/google/caja/plugin/*.js"].each do |file|
+      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
+    end
+    
+    Dir["#{Caja.src_path}/ant-lib/com/google/caja/plugin/css-defs.js"].each do |file|
+      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
+    end
+    
     FileUtils.cp(File.join(PROTOTYPE_DIST_DIR, 'prototype.js'), File.join(PROTOTYPE_TMP_DIR, 'assets'))
   end
   

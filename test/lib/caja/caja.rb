@@ -1,4 +1,30 @@
 module Caja
+  JS_FILES = %w[
+    caja-debugmode
+    caja
+    css-defs
+    domita
+    html-emitter
+    html-sanitizer
+    html4-defs
+    log-to-console
+    permissive
+    unicode
+  ]
+  
+  def self.class_path
+    files = Dir["#{self.src_path}/ant-jars/*.jar"]
+    raise "Your CAJA_SRC_PATH should point to the Caja SVN trunk." if files.empty?
+    files << File.expand_path(File.join(PROTOTYPE_TEST_DIR, 'lib', 'caja', 'whitelist'))
+    files.join(':')
+  end
+  
+  def self.src_path
+    raise "You must define CAJA_SRC_PATH to run cajoled tests." unless ENV['CAJA_SRC_PATH']
+    File.expand_path(ENV['CAJA_SRC_PATH'])
+  end
+  
+  
   class CompileError < StandardError
     ERRORS = %w[FATAL_ERROR ERROR Exception]
     
@@ -86,15 +112,6 @@ module Caja
   end
   
   private
-    def self.class_path
-      caja_src_path = ENV['CAJA_SRC_PATH']
-      raise "You must define CAJA_SRC_PATH to run cajoled tests." unless caja_src_path
-      caja_src_path = File.expand_path(caja_src_path)
-      files = Dir["#{caja_src_path}/ant-jars/*.jar"]
-      files << File.expand_path(File.join(PROTOTYPE_TEST_DIR, 'lib', 'caja', 'whitelist'))
-      files.join(':')
-    end
-    
     def self.to_option_string(options)
       options.reject{ |k, v| v.nil? }.map do |k, v|
          v === true ? " -#{k}" : " -#{k} #{v}"
