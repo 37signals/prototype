@@ -1,17 +1,4 @@
 module Caja
-  JS_FILES = %w[
-    caja-debugmode
-    caja
-    css-defs
-    domita
-    html-emitter
-    html-sanitizer
-    html4-defs
-    log-to-console
-    permissive
-    unicode
-  ]
-  
   def self.class_path
     files = Dir["#{self.src_path}/ant-jars/*.jar"]
     raise "Your CAJA_SRC_PATH should point to the Caja SVN trunk." if files.empty?
