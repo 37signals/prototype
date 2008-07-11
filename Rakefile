@@ -108,18 +108,15 @@ namespace 'caja' do
     assets_dir = File.join(PROTOTYPE_TMP_DIR, 'assets')
     FileUtils.rm_rf(assets_dir) if File.exist?(assets_dir)
     FileUtils.cp_r(File.join(PROTOTYPE_TEST_DIR, 'lib', 'assets'), PROTOTYPE_TMP_DIR)
-    Dir["#{Caja.src_path}/src/com/google/caja/*.js"].each do |file|
-      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
-    end
-    Dir["#{Caja.src_path}/src/com/google/caja/plugin/*.js"].each do |file|
-      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
-    end
     
-    Dir["#{Caja.src_path}/ant-lib/com/google/caja/plugin/css-defs.js"].each do |file|
-      FileUtils.cp(file, File.join(PROTOTYPE_TMP_DIR, 'assets'))
+    caja_file_path = File.join(Caja.src_path, 'src', 'com', 'google', 'caja')
+    plugins = Dir[File.join(caja_file_path, 'plugin', '*.js')]
+    Dir[File.join(caja_file_path, '*.js')].concat(plugins).each do |file|
+      FileUtils.cp(file, assets_dir)
     end
+    FileUtils.cp(File.join(Caja.src_path, 'ant-lib', 'com', 'google', 'caja', 'plugin', 'css-defs.js'), assets_dir)
     
-    FileUtils.cp(File.join(PROTOTYPE_DIST_DIR, 'prototype.js'), File.join(PROTOTYPE_TMP_DIR, 'assets'))
+    FileUtils.cp(File.join(PROTOTYPE_DIST_DIR, 'prototype.js'), assets_dir)
   end
   
   desc 'Copies fixtures to test/unit/tmp/fixtures directory.'
