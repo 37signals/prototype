@@ -77,7 +77,7 @@ JavaScriptTestTask.new(:test_units) do |t|
 end
 
 desc 'Generates an empty tmp directory for building tests.'
-task :rm_tmp do
+task :clean_tmp do
   puts 'Generating an empty tmp directory for building tests.'
   FileUtils.rm_rf(PROTOTYPE_TMP_DIR) if File.exist?(PROTOTYPE_TMP_DIR)
   Dir.mkdir(PROTOTYPE_TMP_DIR)
@@ -87,7 +87,7 @@ namespace 'caja' do
   require 'test/lib/caja/caja.rb'
   
   desc 'Builds and cajoles gadgets.'
-  task :cajole_gadgets => [:rm_tmp, :copy_assets, :copy_fixtures] do
+  task :cajole_gadgets => [:clean_tmp, :copy_assets, :copy_fixtures] do
     Dir["test/unit/truth_test.js"].each do |file|  # TODO *_test.js
       puts "\nBuilding gadget for #{file}."
       puts "Cajoling gadget for #{file} (this might take a while)."
