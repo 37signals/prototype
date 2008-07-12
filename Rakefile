@@ -52,7 +52,7 @@ task :test => [:dist, :test_units]
 
 require 'test/lib/jstest'
 desc "Runs all the JavaScript unit tests and collects the results"
-JavaScriptTestTask.new(:test_units) do |t|
+JavaScriptTestTask.new(:test_units => [:build_unit_tests]) do |t|
   testcases        = ENV['TESTCASES']
   tests_to_run     = ENV['TESTS']    && ENV['TESTS'].split(',')
   browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
@@ -62,18 +62,26 @@ JavaScriptTestTask.new(:test_units) do |t|
   
   Dir.mkdir(PROTOTYPE_TMP_DIR) unless File.exist?(PROTOTYPE_TMP_DIR)
   
-  Dir["test/unit/*_test.js"].each do |file|
-    # PageBuilder.new(file, 'prototype.erb').render # TODO
-    test_file = File.basename(file, ".js")
-    test_name = test_file.sub("_test", "")
+  Dir["test/unit/tmp/*_test.html"].each do |file|
+    test_name = File.basename(file).sub("_test.html", "")
     unless tests_to_run && !tests_to_run.include?(test_name)
-      t.run("/test/unit/tmp/#{test_file}.html", testcases)
+      t.run("/#{file}", testcases)
     end
   end
   
   %w( safari firefox ie konqueror opera ).each do |browser|
     t.browser(browser.to_sym) unless browsers_to_test && !browsers_to_test.include?(browser)
   end
+end
+
+task :build_unit_tests do
+  Dir[File.join('test', 'unit', '*_test.js')].each do |file|
+    PageBuilder.new(file, 'prototype.erb').render
+  end
+end
+
+task :clean_package_source do
+  rm_rf File.join(PROTOTYPE_PKG_DIR, "prototype-#{PROTOTYPE_VERSION}")
 end
 
 desc 'Generates an empty tmp directory for building tests.'
@@ -103,7 +111,7 @@ namespace 'caja' do
   end
   
   desc 'Copies assets to test/unit/tmp/assets directory.'
-  task :copy_assets => [:dist] do
+  task :copy_assets => [] do
     puts 'Copying assets to test/unit/tmp/assets directory.'
     assets_dir = File.join(PROTOTYPE_TMP_DIR, 'assets')
     FileUtils.rm_rf(assets_dir) if File.exist?(assets_dir)
