@@ -1,6 +1,8 @@
 require 'rake'
 require 'rake/packagetask'
 
+# Small comment added.
+
 PROTOTYPE_ROOT     = File.expand_path(File.dirname(__FILE__))
 PROTOTYPE_SRC_DIR  = File.join(PROTOTYPE_ROOT, 'src')
 PROTOTYPE_DIST_DIR = File.join(PROTOTYPE_ROOT, 'dist')
