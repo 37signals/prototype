@@ -28,11 +28,9 @@ var Class = {
       this.initialize.apply(this, arguments);
     }
     
-    caja.extendStatic(klass, Class.Methods);
-    caja.extendStatic(klass, {
-      superclass: parent,
-      subclasses: []
-    });
+    Object.extend(klass, Class.Methods);
+    klass.superclass = parent;
+    klass.subclasses = [];
     
     if (parent) {
       var subclass = function() { };
@@ -69,8 +67,8 @@ Class.Methods = {
           return function() { return ancestor[m].apply(this, arguments) };
         })(property).wrap(method);
 
-      //  value.valueOf = method.valueOf.bind(method);
-      //  value.toString = method.toString.bind(method);
+        // value.valueOf = method.valueOf.bind(method);
+        // value.toString = method.toString.bind(method);
       }
       this.prototype[property] = value;
     }
@@ -81,13 +79,13 @@ Class.Methods = {
 
 var Abstract = { };
 
-caja.extendStatic(Object, {
-  extend: function(destination, source) {
-    for (var property in source)
-      destination[property] = source[property];
-    return destination;
-  },
-  
+Object.extend = function(destination, source) {
+  for (var property in source)
+    destination[property] = source[property];
+  return destination;
+};
+
+Object.extend(Object, {
   inspect: function(object) {
     try {
       if (Object.isUndefined(object)) return 'undefined';
@@ -237,16 +235,14 @@ Object.extend(Function.prototype, {
   }
 });
 
-caja.extendInstances(Date, {
-  toJSON: function() {
-    return '"' + this.getUTCFullYear() + '-' +
-      (this.getUTCMonth() + 1).toPaddedString(2) + '-' +
-      this.getUTCDate().toPaddedString(2) + 'T' +
-      this.getUTCHours().toPaddedString(2) + ':' +
-      this.getUTCMinutes().toPaddedString(2) + ':' +
-      this.getUTCSeconds().toPaddedString(2) + 'Z"';
-  }
-});
+Date.prototype.toJSON = function() {
+  return '"' + this.getUTCFullYear() + '-' +
+    (this.getUTCMonth() + 1).toPaddedString(2) + '-' +
+    this.getUTCDate().toPaddedString(2) + 'T' +
+    this.getUTCHours().toPaddedString(2) + ':' +
+    this.getUTCMinutes().toPaddedString(2) + ':' +
+    this.getUTCSeconds().toPaddedString(2) + 'Z"';
+};
 
 var Try = {
   these: function() {
@@ -264,12 +260,11 @@ var Try = {
   }
 };
 
-caja.aliasInstances(RegExp, 'match', 'test');
-caja.extendInstances(RegExp, {
-  escape: function(str) {
-    return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
-  }
-});
+RegExp.prototype.match = RegExp.prototype.test;
+
+RegExp.escape = function(str) {
+  return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+};
 
 /*--------------------------------------------------------------------------*/
 
