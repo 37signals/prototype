@@ -67,7 +67,7 @@ Class.Methods = {
           return function() { return ancestor[m].apply(this, arguments) };
         })(property).wrap(method);
 
-        value.valueOf = method.valueOf.bind(method);
+        // value.valueOf = method.valueOf.bind(method);
         // value.toString = method.toString.bind(method);
       }
       this.prototype[property] = value;
