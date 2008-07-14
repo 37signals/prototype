@@ -111,7 +111,7 @@ namespace 'caja' do
   end
   
   desc 'Copies assets to test/unit/tmp/assets directory.'
-  task :copy_assets => [] do
+  task :copy_assets => [:dist] do
     puts 'Copying assets to test/unit/tmp/assets directory.'
     assets_dir = File.join(PROTOTYPE_TMP_DIR, 'assets')
     FileUtils.rm_rf(assets_dir) if File.exist?(assets_dir)
@@ -123,7 +123,6 @@ namespace 'caja' do
       FileUtils.cp(file, assets_dir)
     end
     FileUtils.cp(File.join(Caja.src_path, 'ant-lib', 'com', 'google', 'caja', 'plugin', 'css-defs.js'), assets_dir)
-    
     FileUtils.cp(File.join(PROTOTYPE_DIST_DIR, 'prototype.js'), assets_dir)
   end
   
