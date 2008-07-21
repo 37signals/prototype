@@ -150,7 +150,7 @@ Object.extend(Event, (function() {
     // won't get copied to a new node when cloneNode is called.
     if (element === window) return 1;
     if (element._prototypeEventID) return element._prototypeEventID[0];
-    return element._prototypeEventID = [arguments.callee.id++];
+    return (element._prototypeEventID = [arguments.callee.id++])[0];
   }
   getEventID.id = 2;
   
