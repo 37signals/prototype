@@ -1,3 +1,5 @@
+* Restore line omitted from getOffsetParent. [jddalton]
+
 * Fix bug in getEventID where an array is returned instead of a number. [jddalton]
 
 * Improve NodeList detection for Safari's $A function. [Garrett Smith, jddalton]
