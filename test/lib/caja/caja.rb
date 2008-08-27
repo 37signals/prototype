@@ -88,7 +88,7 @@ module Caja
   HEAP = 512
   
   def self.cajole(options = {})
-    options = options.merge(:w => true)
+    options = options.merge(:a => true)
     java("com.google.caja.plugin.PluginCompilerMain", options)
   end
   
