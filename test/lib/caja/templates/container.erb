@@ -17,9 +17,9 @@
     }
   };
   </script>
+
   <script type="text/javascript" src="assets/caja.js"></script>
-  <script type="text/javascript" src="assets/valija-cajita.js"></script>
-  <script type="text/javascript" src="assets/permissive.js"></script>
+  <!-- <script type="text/javascript" src="assets/permissive.js"></script> -->
   <script type="text/javascript" src="assets/caja-debugmode.js"></script>
   <script type="text/javascript" src="assets/log-to-console.js"></script>
   <script type="text/javascript" src="assets/unicode.js"></script>
@@ -28,8 +28,28 @@
   <script type="text/javascript" src="assets/html-sanitizer.js"></script>
   <script type="text/javascript" src="assets/html-emitter.js"></script>
   <script type="text/javascript" src="assets/domita.js"></script>
+
 </head>
 <body>
+
+  <script type="text/javascript">
+    var valijaMaker = undefined;
+
+    (function(){
+      var imports = ___.copy(___.sharedImports);
+      imports.loader = {
+        provide: ___.simpleFunc(function(v) {
+          valijaMaker = v;
+        })
+      };
+      ___.grantRead(imports, 'loader');
+      ___.grantCall(imports.loader, 'provide');
+      ___.getNewModuleHandler().setImports(imports);
+    })();
+  </script>
+
+  <script type="text/javascript" src="assets/valija-cajoled.js"></script>
+
   <script type="text/javascript">
 
   (function () {
@@ -43,16 +63,49 @@
     }
   })();
   </script>
-  
+
   <div id="base-test" class="test"></div>
 
   <script type="text/javascript">
-    var testImports = ___.copy(___.sharedImports);
-    attachDocumentStub('-test', { rewrite: function () { return null; } }, testImports);
-    testImports.htmlEmitter___ = new HtmlEmitter(document.getElementById('base-test'));
-    ___.getNewModuleHandler().setImports(testImports);
-  </script>
-  <script src="<%= @cajoled_gadget %>" type="text/javascript"></script>
+    (function() {
+      var imports = ___.copy(___.sharedImports);
+  
+      attachDocumentStub('-test', { rewrite: function () { return null; } }, imports);
+      imports.htmlEmitter___ = new
+      HtmlEmitter(document.getElementById('base-test'));
+  
+      imports.navigator = {};
+      imports.navigator.userAgent = "Caja/1.0";
+      ___.grantRead(imports.navigator, 'userAgent');
+  
+      ___.grantRead(imports, 'navigator');
+      ___.grantRead(imports.navigator, 'userAgent');
+      ___.grantCall(imports.navigator.userAgent, 'toString');
+      ___.getNewModuleHandler().setImports(imports);
 
+      imports.valija = valijaMaker(imports);
+      ___.grantRead(imports, 'valija');
+
+      imports.valija.document = imports.document;
+      imports.valija.window = imports.window;
+      imports.valija.navigator = imports.navigator;
+      ___.grantRead(imports.valija, 'document');
+      ___.grantRead(imports.valija, 'window');
+      ___.grantRead(imports.valija, 'navigator');  
+
+      console.log('imports.document = ' + imports.document);
+      console.log('imports.window = ' + imports.window);    
+      console.log('imports.navigator = ' + imports.navigator);
+
+      console.log('imports.valija.document = ' + imports.valija.document);
+      console.log('imports.valija.window = ' + imports.valija.window);    
+      console.log('imports.valija.navigator = ' + imports.valija.navigator);
+  
+      ___.getNewModuleHandler().setImports(imports);
+    })();
+  </script>
+
+  <script src="<%= @cajoled_gadget %>" type="text/javascript"></script>
+  
 </body>
 </html>
